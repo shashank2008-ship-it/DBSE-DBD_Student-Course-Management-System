@@ -1,0 +1,2 @@
+import React from 'react';import {Navigate,Outlet} from 'react-router-dom';import {useApp} from '../context/AppContext';
+export default function ProtectedRoute({children,adminOnly=false}){const {isAuthenticated,authLoading,isAdmin}=useApp();if(authLoading)return <div className="portal-loading">Verifying your session…</div>;if(!isAuthenticated)return <Navigate to="/login" replace/>;if(adminOnly&&!isAdmin)return <Navigate to="/dashboard" replace/>;return children||<Outlet/>;}

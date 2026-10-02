@@ -1,0 +1,526 @@
+{
+  "info": {
+    "name": "Student Portal Pro v3 \u2014 Cluster Edition",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "studentId",
+      "value": "2024CSB1084"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login Student",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentIdOrEmail\": \"2520030477\",\n  \"password\": \"Student@2026!\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+              "const data=pm.response.json();",
+              "if(data.token) pm.collectionVariables.set(\"token\",data.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Login Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentIdOrEmail\": \"admin\",\n  \"password\": \"Admin@2026!\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));",
+              "const data=pm.response.json();",
+              "if(data.token) pm.collectionVariables.set(\"token\",data.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Verify Session",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/auth/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Courses",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/courses"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Student Profile",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/students/2520030477"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Enroll Course",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/enrollments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"courseId\": \"ML\",\n  \"sectionId\": \"ML-SEC1\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Join Waitlist",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/enrollments",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"courseId\": \"SEC\",\n  \"sectionId\": \"SEC-SEC1\",\n  \"waitlist\": true\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Timetable",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/timetable/2520030477"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Grades",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/grades/2520030477"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/notifications/2520030477"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Overview",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/admin/overview"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Audit",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/admin/audit"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Analytics",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/admin/analytics"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Publish Grade",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/admin/grades",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentId\": \"2520030477\",\n  \"courseId\": \"DBMS\",\n  \"internalMarks\": 27,\n  \"midtermMarks\": 18,\n  \"finalMarks\": 43\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Record Attendance",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/admin/attendance",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"studentId\": \"2520030477\",\n  \"courseId\": \"DBMS\",\n  \"sessionDate\": \"2026-09-30\",\n  \"present\": true\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Successful response\", () => pm.expect(pm.response.code).to.be.oneOf([200,201]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Cluster Enrollment and Official CGPA",
+      "item": [
+        {
+          "name": "List clusters and offerings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/clusters"
+          }
+        },
+        {
+          "name": "Choose cluster before enrollment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/clusters/students/{{studentId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clusterId\": \"CLUSTER-2\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Admin set official CGPA",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/clusters/students/{{studentId}}/cgpa",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": 8.75,\n  \"reason\": \"Verified prior-semester transcript\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Admin restore calculated GPA",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/clusters/students/{{studentId}}/cgpa",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": null,\n  \"reason\": \"Restore grade-derived calculation\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Admin academic change history",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/clusters/audit/history"
+          }
+        }
+      ]
+    }
+  ]
+}

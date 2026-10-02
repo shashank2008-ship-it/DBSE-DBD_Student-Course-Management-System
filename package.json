@@ -1,0 +1,15 @@
+{
+  "name": "student-portal-pro-v3-clusters",
+  "version": "3.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix Student-Portal-Pro run dev",
+    "start": "npm --prefix Student-Portal-Pro start",
+    "build": "npm --prefix Student-Portal-Pro run build",
+    "setup": "npm --prefix Student-Portal-Pro run setup",
+    "test": "npm --prefix Student-Portal-Pro test"
+  },
+  "devDependencies": {
+    "docx": "^9.8.1"
+  }
+}

@@ -1,0 +1,25 @@
+const auth={type:'http',scheme:'bearer',bearerFormat:'JWT'};
+const response={description:'Successful response',content:{'application/json':{schema:{type:'object',properties:{success:{type:'boolean'},message:{type:'string'}}}}}};
+const paths={};const S={type:'string'},N={type:'number'},B={type:'boolean'};
+function add(path,method,summary,fields=null,publicRoute=false){const params=[...path.matchAll(/\{(.*?)\}/g)].map(m=>({name:m[1],in:'path',required:true,schema:S}));const op={summary,tags:[path.split('/')[1]],security:publicRoute?[]:[{bearerAuth:[]}],parameters:params,responses:{200:response,201:response,400:{description:'Invalid request'},401:{description:'Authentication missing or invalid'},403:{description:'Role or ownership denied'},404:{description:'Record not found'},409:{description:'Duplicate, full section or eligibility conflict'},429:{description:'Authentication rate limit'},500:{description:'Unexpected error'}}};if(fields)op.requestBody={required:true,content:{'application/json':{schema:{type:'object',properties:fields,required:Object.keys(fields).filter(k=>!['sectionId','waitlist','phone','department','year'].includes(k))}}}};(paths[path]??={})[method]=op;}
+add('/health','get','Database-aware readiness check',null,true);
+add('/auth/login','post','Sign in and obtain an eight-hour JWT',{studentIdOrEmail:S,password:S},true);
+add('/auth/register','post','Register a student',{rollNumber:S,fullName:S,email:{type:'string',format:'email'},password:{type:'string',minLength:8,maxLength:128},department:S,year:S},true);
+add('/auth/me','get','Restore a verified session');add('/auth/change-password','post','Change password',{currentPassword:S,newPassword:{type:'string',minLength:8,maxLength:128}});
+add('/courses','get','Public course catalog and section capacities',null,true);add('/courses/{id}','get','Course details',null,true);
+add('/students','get','Student summaries (admin only)');add('/students/{id}','get','Student profile (owner or admin)');add('/students/{id}','put','Update own contact details',{fullName:S,email:S,phone:S});
+add('/enrollments/{studentId}','get','Read active enrollments');add('/enrollments','post','Enroll, switch section or join full-section waitlist',{courseId:S,sectionId:S,waitlist:B});add('/enrollments','delete','Drop own course',{courseId:S});
+add('/enrollments/eligibility/{courseId}/{sectionId}','get','Check prerequisites, schedule conflict and credit limit');add('/enrollments/waitlist/{studentId}','get','Read own waitlist');add('/enrollments/waitlist/{id}','delete','Cancel own waitlist entry');
+add('/timetable/{studentId}','get','Section-specific timetable');add('/grades/{studentId}','get','Published marks');add('/grades/transcript/{studentId}','get','Download transcript CSV');paths['/grades/transcript/{studentId}'].get.responses[200]={description:'CSV transcript from stored procedure',content:{'text/csv':{schema:S}}};
+add('/notifications/{studentId}','get','Read own latest notifications');add('/notifications/{id}/read','patch','Mark owned notification read');add('/notifications/read-all/{studentId}','patch','Mark all owned notifications read');
+for(const p of ['overview','students','enrollments','faculty','audit','waitlist','analytics'])add('/admin/'+p,'get',`Administrator: ${p}`);
+add('/admin/enrollments/drop','post','Administrator drops course transactionally',{studentId:S,courseId:S});add('/admin/grades','put','Publish grade and recalculate summaries',{studentId:S,courseId:S,internalMarks:{...N,minimum:0,maximum:30},midtermMarks:{...N,minimum:0,maximum:20},finalMarks:{...N,minimum:0,maximum:50}});add('/admin/attendance','put','Upsert daily attendance',{studentId:S,courseId:S,sessionDate:{type:'string',format:'date'},present:B});
+add('/clusters','get','List four clusters, section groups and course offerings');
+add('/clusters/students/{studentId}','put','Choose semester cluster (owner or admin; locks after enrollment)',{clusterId:S,reason:S});
+add('/clusters/students/{studentId}/cgpa','put','Administrator sets or clears official CGPA with an audit reason',{value:{type:'number',minimum:0,maximum:10,nullable:true},reason:S});
+add('/clusters/{id}','put','Administrator renames cluster',{name:S,description:S});
+add('/clusters/groups/{id}/name','put','Administrator renames section group',{name:S});
+add('/clusters/sections/{id}/group','put','Administrator reassigns an empty course offering',{groupId:S});
+add('/clusters/audit/history','get','Administrator reads CGPA and cluster change history');
+paths['/clusters/students/{studentId}'].put.requestBody.content['application/json'].schema.required=['clusterId'];
+export default {openapi:'3.0.3',info:{title:'Student Portal Pro',version:'3.0.0',description:'Modular Node.js / Express backend with MySQL, owner/admin access control and transactional enrollment. Admin routes require role admin.'},servers:[{url:'http://localhost:5000/api'}],components:{securitySchemes:{bearerAuth:auth}},paths};

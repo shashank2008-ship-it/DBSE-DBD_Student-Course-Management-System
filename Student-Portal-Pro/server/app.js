@@ -1,0 +1,16 @@
+import express from 'express';import path from 'node:path';import {fileURLToPath} from 'node:url';import pool from './config/db.js';
+import {authenticate} from './middleware/auth.js';
+import clusters from './routes/clusters.routes.js';
+import auth from './routes/auth.routes.js';import students from './routes/students.routes.js';import courses from './routes/courses.routes.js';import enrollments from './routes/enrollments.routes.js';import grades from './routes/grades.routes.js';import timetable from './routes/timetable.routes.js';import notifications from './routes/notifications.routes.js';import admin from './routes/admin.routes.js';
+const app=express();app.disable('x-powered-by');
+app.use((req,res,next)=>{res.set({'X-Content-Type-Options':'nosniff','X-Frame-Options':'DENY','Referrer-Policy':'same-origin'});if(req.path.startsWith('/api'))res.set('Cache-Control','no-store');next();});
+app.use(express.json({limit:'64kb'}));
+app.get('/api/health',async(req,res)=>{try{await pool.query('SELECT 1');res.json({success:true,status:'online',database:'connected',version:'3.0.0'});}catch{res.status(503).json({success:false,status:'degraded',database:'unavailable',message:'Check MySQL service and server/.env.'});}});
+app.use('/api/auth',auth);app.use('/api/courses',courses);
+app.get('/api/openapi.json',async(req,res)=>{const {default:spec}=await import('./openapi.js');res.json(spec);});
+app.get('/api/docs',(req,res)=>res.type('html').send(`<!doctype html><title>Student Portal API</title><style>body{font:16px system-ui;max-width:1000px;margin:40px auto;padding:20px;color:#17304b}pre{background:#f1f5f9;padding:20px;white-space:pre-wrap}a{color:#2563eb}</style><h1>Student Portal Pro API</h1><p>OpenAPI 3.0 specification. Import this contract into Postman.</p><a href="/api/openapi.json">Download OpenAPI JSON</a><pre id="spec"></pre><script>fetch('/api/openapi.json').then(r=>r.json()).then(d=>document.getElementById('spec').textContent=JSON.stringify(d,null,2))</script>`));
+for(const [name,router] of Object.entries({clusters,students,enrollments,grades,timetable,notifications,admin}))app.use(`/api/${name}`,authenticate,router);
+app.use('/api',(req,res)=>res.status(404).json({success:false,message:'API endpoint not found.'}));
+const root=fileURLToPath(new URL('../dist/',import.meta.url));app.use(express.static(root));app.get('*',(req,res)=>res.sendFile(path.join(root,'index.html'),e=>{if(e)res.status(503).send('Run npm run build first, or use npm run dev for development.');}));
+app.use((err,req,res,next)=>{if(res.headersSent)return next(err);const status=err.status|| (err.code==='ER_DUP_ENTRY'?409:err.code==='ER_NO_REFERENCED_ROW_2'?400:500);console.error(`[${new Date().toISOString()}] ${req.method} ${req.path}: ${err.message}`);res.status(status).json({success:false,message:status===500?'Unexpected server error. Check the backend terminal.':err.code==='ER_DUP_ENTRY'?'This record already exists.':err.code==='ER_NO_REFERENCED_ROW_2'?'Referenced record does not exist.':err.message});});
+export default app;

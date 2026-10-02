@@ -1,0 +1,10 @@
+import express from 'express';
+import pool from '../config/db.js';
+import {getUser} from './auth.routes.js';
+import {asyncRoute,adminOnly,requireOwner} from '../middleware/auth.js';
+import {email,text} from '../services/rules.js';
+const router=express.Router();
+router.get('/',adminOnly,asyncRoute(async(req,res)=>{const [rows]=await pool.query(`SELECT v.student_id,v.roll_number,v.full_name,v.department,v.total_enrolled_courses,v.current_semester_credits,v.average_marks_obtained,COALESCE(o.value,v.current_gpa) current_gpa,v.current_gpa calculated_gpa,IF(o.student_id IS NULL,'calculated','admin') cgpa_source,v.completed_credits,v.semester_gpa,v.attendance_rate FROM v_student_academic_summary v LEFT JOIN cgpa_overrides o ON o.student_id=v.student_id`);res.json({success:true,students:rows,count:rows.length});}));
+router.get('/:id',asyncRoute(async(req,res)=>{requireOwner(req,req.params.id);const student=await getUser(req.params.id,'student');const [rank]=await pool.execute('SELECT * FROM v_student_rankings WHERE student_id=?',[req.params.id]);res.json({success:true,student:{...student,departmentRank:rank[0]?.department_rank,instituteRank:rank[0]?.institute_rank}});}));
+router.put('/:id',asyncRoute(async(req,res)=>{requireOwner(req,req.params.id);const existing=await getUser(req.params.id,'student');const name=req.body.fullName===undefined?existing.fullName:text(req.body.fullName,'Name');const mail=req.body.email===undefined?existing.email:email(req.body.email);const phone=req.body.phone===undefined?existing.phone:String(req.body.phone).trim();if(!/^[+\d\s()-]{0,30}$/.test(phone))return res.status(400).json({success:false,message:'Enter a valid phone number.'});await pool.execute('UPDATE students SET full_name=?,email=?,phone=? WHERE id=?',[name,mail,phone,req.params.id]);res.json({success:true,student:await getUser(req.params.id,'student'),message:'Profile updated.'});}));
+export default router;

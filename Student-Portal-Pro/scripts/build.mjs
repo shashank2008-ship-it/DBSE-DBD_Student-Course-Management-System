@@ -1,0 +1,3 @@
+import {build} from 'esbuild';import {mkdir,writeFile} from 'node:fs/promises';
+await mkdir('dist',{recursive:true});await build({entryPoints:['src/main.jsx'],bundle:true,outfile:'dist/assets/app.js',minify:true,sourcemap:false,platform:'browser',target:['es2020'],define:{'process.env.NODE_ENV':'"production"'},loader:{'.js':'jsx'}});
+await writeFile('dist/index.html','<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="theme-color" content="#2563eb"><title>Student Portal Pro</title><link rel="stylesheet" href="/assets/app.css"></head><body><div id="root"></div><script type="module" src="/assets/app.js"></script></body></html>');console.log('Production frontend built successfully.');

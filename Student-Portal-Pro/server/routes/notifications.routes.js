@@ -1,0 +1,5 @@
+import express from 'express';import pool from '../config/db.js';import {asyncRoute,requireOwner} from '../middleware/auth.js';import {ApiError} from '../services/rules.js';
+const router=express.Router();
+router.get('/:studentId',asyncRoute(async(req,res)=>{requireOwner(req,req.params.studentId);const [rows]=await pool.execute('SELECT * FROM notifications WHERE student_id=? ORDER BY created_at DESC LIMIT 100',[req.params.studentId]);res.json({success:true,notifications:rows.map(r=>({id:r.id,title:r.title,message:r.message,category:r.category,read:Boolean(r.is_read),timestamp:r.created_at}))});}));
+router.patch('/read-all/:studentId',asyncRoute(async(req,res)=>{requireOwner(req,req.params.studentId);await pool.execute('UPDATE notifications SET is_read=TRUE WHERE student_id=?',[req.params.studentId]);res.json({success:true});}));
+router.patch('/:id/read',asyncRoute(async(req,res)=>{const [result]=await pool.execute('UPDATE notifications SET is_read=TRUE WHERE id=? AND student_id=?',[req.params.id,req.user.id]);if(!result.affectedRows)throw new ApiError(404,'Notification not found.');res.json({success:true});}));export default router;

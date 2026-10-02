@@ -1,0 +1,37 @@
+STUDENT PORTAL PRO v3 — CLUSTER EDITION
+
+1. Extract the ZIP and open the Student-Portal-Pro folder.
+2. Start your MySQL service.
+3. Double-click SETUP-WINDOWS.bat once.
+   MySQL host: press Enter for 127.0.0.1
+   MySQL port: press Enter for 3306
+   MySQL username: press Enter for root
+   Password: use your MySQL root password.
+4. Double-click START-WINDOWS.bat.
+5. Open http://localhost:5000
+
+ADMIN: admin / Admin@2026!
+STUDENT: 2520030477 / Student@2026!
+UNASSIGNED DEMO STUDENT: 2024CSB1084 / Student@2026!
+
+Student: open My Cluster, select a cluster, then Enrollment Planner.
+There are four clusters with 2, 3, 2 and 3 section groups.
+All enrolled subjects must belong to the selected cluster.
+First enrollment/waitlist locks the choice for the semester.
+
+Admin: Student Directory > Edit academic record > enter CGPA and reason > Save CGPA.
+Blank CGPA restores the calculated value. Cluster Management shows offerings and audit history.
+
+UPGRADING YOUR EXISTING VERSION:
+Stop it with Ctrl+C. Copy the old server/.env into this new server folder,
+then run SETUP-WINDOWS.bat and START-WINDOWS.bat.
+Using the same database preserves your records. Setup adds cluster tables and offerings.
+
+VS CODE ALTERNATIVE (run in the folder containing package.json):
+npm.cmd install
+npm.cmd --prefix server install
+npm.cmd run setup
+npm.cmd start
+
+For later runs, start MySQL and double-click START-WINDOWS.bat.
+Full instructions: README.md.
